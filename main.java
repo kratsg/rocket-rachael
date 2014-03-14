@@ -39,11 +39,11 @@ public class Formula
 
   //pre-set values
   static double gravity         = 9.801, // in m/s^2
-                waterMass       = .355/1000., //in kg
+                waterMass       = 0.355., //in kg
                 AirPressure     = 70., //in psi
-                MassFlowRate    = 13.25/1000., // in kg/sec ??
+                MassFlowRate    = 13.25., // in kg/sec ??
                 ExitVelocity    = 27.05, // in m/sec?
-                Thrust          = 358., //in Newtons
+                Thrust          = MassFlowRate * ExitVelocity, //in Newtons
                 LaunchInitValue = 30., //in meters/second
                 launchAngle     = 50.; // in degrees
   
@@ -54,89 +54,75 @@ public class Formula
     noseCone               = noseCone;
   }
   
-  public ArrayList<Double> xForce()
+  // F_x = F_thrust cos(theta) - F_drag
+  //    assume F_drag ~ 0
+  public double xForce()
   {
-    double x;
-    ArrayList<Double> xForces = new ArrayList<Double>();
-
-    double dragForce = rocketMass; // why is it just rocket mass? that's not a force
-    for(int q=1; q<=numTrials; q++)
-    {
-      x = Thrust * Math.cos( launchAngle ) - dragForce;
-      dragForce += q; // same as dragForce = q + dragForce, looks better
-      xForces.add(x);
-    }
-    return xForces; 
+    return Thrust*Math.cos( launchAngle );
   }
    
+  // F_y = F_thrust sin(theta) - F_gravity
   public double yForce()
   {
-    double q       = Thrust * Math.sin( launchAngle ) - rocketMass * gravity;
-    double z       = q * ( rocketMass + waterMass );
-    double yForces = z * gravity;
-    return yForces; 
+    return Thrust * Math.sin(launchAngle) - rocketMass * gravity;
   }
-   
-  public double netForces()
+  
+  // vector addition here
+  // F_net = \vec{F}_x + \vec{F}_y = \sqrt{F_x^2 + F_y^2}
+  public double netForce()
   {
-    xForces = xForce();
-    yForces = yForce();
-    double yForcesSquare = yForces**2., xForcesSquare = 0.;
-    for(int e=0; e<xForces.size(); e++)
-    {
-      xForcesSquare += xForces.get(e)**2.;// you probably meant to sum up all
-    }
-    netForce = Math.sqrt( xForcesSquare + yForcesSquare ) - noseCone; // noseCone?
-    return netForce;
+    return ( xForce()**2. + yForce()**2. )**0.5;
   }
 
+  // a = F_net / average mass of empty rocket bottle and water
   public double netAcceleration()
   {
-    return netForces() / rocketMass;
+    return netForce() / (( rocketMass + waterMass )/2.);
   }
    
   public double WaterExpelledFlightTime()
   {
     return waterMass / MassFlowRate;
   }
+
+  // V_rocket = net acceleration * time when all water is expelled
+  public double VRocket(){
+    return netAcceleration() * WaterExpelledFlightTime();
+  }
  
+  // R = V_rocket^2 * sin(2*angle) * (1/g)
   public double Range()
   {
-    double z = (netAcceleration() * WaterExpelledFlightTime() )**2.;
-    double range = ( 2. * Math.sin( launchAngle ) ) * z;
-    range /= gravity; // same as range = range/gravity
-    return range;
+    return ( ( VRocket()**2. * Math.sin(2*launchAngle) )/gravity );
   }
  
-  public double xComponentVel()
+  // V_x = V * cos(angle)
+  public double VRocketX()
   {
-    return LaunchInitValue * Math.cos( launchAngle );
+    return VRocket() * Math.cos( launchAngle );
   }
 
-  public double yComponentVel()
+  // V_y = V * sin(angle)
+  public double VRocketY()
   {
-    return LaunchInitValue * Math.sin( launchAngle );
+    return VRocket() * Math.sin( launchAngle );
   }
 
   //total time calculation
+  // t_f = R/V_rocket_x + 2 * water expelled time
   public double flightTime()
   {
-    double range     = Range();
-    double a         = netAcceleration();
-    double tempTime  = LaunchInitValue / a;
-    double finalTime = tempTime;
-    // you don't do anything with range or a ???
-    return finalTime;
+    return Range() / VRocketX() + 2*WaterExpelledTime();
   }
  
   //graphing methods
   public double vertexXPoint()
   {
     // return  (total_time / 2)* (velocity in x)
-    return 0.5 * flightTime() * xComponentVel();
+    return 0.5 * flightTime() * VRocketX();
   }
   
-  // this seems wrong
+  // this seems wrong -- not in paper, needs to be fixed???
   public double vertexYPoint()
   {
     return -1. * ( (LaunchInitValue / 2. ) * flightTime() ) * 2;
@@ -163,7 +149,8 @@ public class Formula
     for(int t=tt; t > 0; t--)
     {
       // y = vi_y * t - 1/2 g t^2
-      y = yComponentVel() * t - ( 0.5* gravity * t**2. );
+      y = VRocketY() * t - ( 0.5* gravity * t**2. );
+      //y = LaunchInitValue * Math.sin(launchAngle) * t - ( 0.5 * gravity * t**2. )
       yPoints.add(y);
     }
     return yPoints;
@@ -180,7 +167,8 @@ public class Formula
     for(int t = tt; t > 0; t--)
     {
       // x = vi_x * t
-      x = xComponentVel() * t;
+      x = VRocketX() * t;
+      //x = LaunchInitVal * Math.cos( launchAngle ) * t
       xPoints.add(xPosition);
     }
     return xPoints;
@@ -189,7 +177,7 @@ public class Formula
   public Double endX()
   {
     // x = vi_x * total_time
-    return xComponentVel() * flightTime();
+    return VRocketX() * flightTime();
   }
 
   //send off to graphics class
