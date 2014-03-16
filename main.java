@@ -12,30 +12,25 @@ public class Main
   public static void main(String[] args)
   {
     Scanner indata = new Scanner(System.in);
-    double rocketMass = 0., noseCone = .29; // kg
-    String RM="", NT="";
-    int numFins, numTrials;
+    double rocketMass; // kg
+    String RM="";
     BufferedImage rocketCones;
     
     RM=JOptionPane.showInputDialog(null, "Enter the total mass of your rocket in grams:");
     rocketMass=Double.parseDouble(RM);
-    
-    NT=JOptionPane.showInputDialog(null, "Enter the number of trials you want to run:");
-    numTrials=Integer.parseInt(NT);
       
     //send off to Formula class
-    Formula mass = new Formula(rocketMass, numTrials, noseCone);
+    Formula rocket = new Formula(rocketMass);
     System.out.println( mass.flightTime() );
-    System.out.println( "x=" + mass.createXPoints() );
-    System.out.println( "y=" + mass.createYPoints() );
+    System.out.println( "x=" + rocket.createXPoints() );
+    System.out.println( "y=" + rocket.createYPoints() );
   }
 }
 
 public class Formula
 {
   // class variables
-  double rocketMass, noseCone;
-  int numTrials;
+  double rocketMass;
 
   //pre-set values
   static double gravity         = 9.801, // in m/s^2
@@ -47,11 +42,11 @@ public class Formula
                 LaunchInitValue = 30., //in meters/second
                 launchAngle     = 50.; // in degrees
   
-  public Formula(double rocketMass, int numTrials, double noseCone)
+  public Formula(double rocketMass_in)
   {
-    rocketMass             = rocketMass;
-    numTrials              = numTrials; 
-    noseCone               = noseCone;
+    rocketMass             = rocketMass_in;
+    System.out.println("Inputs received");
+    System.out.println("\t rocket mass: " + rocketMass + " kg");
   }
   
   // F_x = F_thrust cos(theta) - F_drag
