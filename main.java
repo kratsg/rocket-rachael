@@ -112,7 +112,7 @@ public class Formula
   // t_f = R/V_rocket_x + 2 * water expelled time
   public double flightTime()
   {
-    return Range() / VRocketX() + 2*WaterExpelledTime();
+    return Range() / VRocketX() + 2*WaterExpelledFlightTime();
   }
  
   //graphing methods
@@ -139,7 +139,7 @@ public class Formula
     return ( (startY-Y) / Math.pow(startX-X, 2.) );
   }
    
-  ArrayList<Double> createYPoints(){
+  public ArrayList<Double> createYPoints(){
     GraphingFormulaCalculation();
     //initialize yPoints
     ArrayList<Double> yPoints = new ArrayList<Double>();
@@ -156,7 +156,7 @@ public class Formula
     return yPoints;
   }
 
-  ArrayList<Double> createXPoints()
+  public ArrayList<Double> createXPoints()
   {
     GraphingFormulaCalculation();
     //initialize xPoints
