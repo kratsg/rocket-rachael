@@ -71,7 +71,7 @@ public class Formula
   // F_net = \vec{F}_x + \vec{F}_y = \sqrt{F_x^2 + F_y^2}
   public double netForce()
   {
-    return ( xForce()**2. + yForce()**2. )**0.5;
+    return Math.pow( Math.pow(xForce(),2.) + Math.pow(yForce(),2.), 0.5);
   }
 
   // a = F_net / average mass of empty rocket bottle and water
@@ -93,7 +93,7 @@ public class Formula
   // R = V_rocket^2 * sin(2*angle) * (1/g)
   public double Range()
   {
-    return ( ( VRocket()**2. * Math.sin(2*launchAngle) )/gravity );
+    return ( ( Math.pow(VRocket(),2.) * Math.sin(2*launchAngle) )/gravity );
   }
  
   // V_x = V * cos(angle)
@@ -136,7 +136,7 @@ public class Formula
            Y         = vertexYPoint(),
            startX    = 0.0,
            startY    = 0.0;
-    return ( (startY-Y) / (startX-X)**2. );
+    return ( (startY-Y) / Math.pow(startX-X, 2.) );
   }
    
   ArrayList<Double> createYPoints(){
@@ -149,7 +149,7 @@ public class Formula
     for(int t=tt; t > 0; t--)
     {
       // y = vi_y * t - 1/2 g t^2
-      y = VRocketY() * t - ( 0.5* gravity * t**2. );
+      y = VRocketY() * t - ( 0.5* gravity * Math.pow(t, 2.) );
       //y = LaunchInitValue * Math.sin(launchAngle) * t - ( 0.5 * gravity * t**2. )
       yPoints.add(y);
     }
@@ -169,7 +169,7 @@ public class Formula
       // x = vi_x * t
       x = VRocketX() * t;
       //x = LaunchInitVal * Math.cos( launchAngle ) * t
-      xPoints.add(xPosition);
+      xPoints.add(x);
     }
     return xPoints;
   }
